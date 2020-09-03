@@ -1,0 +1,77 @@
+@extends('layouts.app')
+
+@section('content')
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-11">
+                <div class="card">
+
+                    @isset($filter)
+                        <div class="card-header">Filtered hobbies by
+                            <span style="font-size: 130%;"
+                                  class="badge badge-{{ $filter->style }}">{{ $filter->name }}</span>
+                            <span class="float-right"><a href="/hobby">Show all Hobbies</a></span>
+                        </div>
+                    @else
+                        <div class="card-header">All the hobbies</div>
+                    @endisset
+
+                    <div class="card-body">
+                        <ul class="list-group">
+                            @foreach($hobbies as $hobby)
+                                <li class="list-group-item">
+                                    @if(file_exists('img/hobbies/' . $hobby->id . '_thumb.jpg'))
+                                        <a title="Show Details" href="/hobby/{{ $hobby->id }}">
+                                            <img src="/img/hobbies/{{ $hobby->id }}_thumb.jpg" alt="Hobby Thumb">
+                                        </a>
+                                    @endif
+                                    &nbsp;<a class="btn btn-sm btn-light" title="Show Details" href="/hobby/{{ $hobby->id }}"><u>{{ $hobby->name }}</u></a>
+                                        @auth
+                                            @can('update', $hobby)
+                                                <a class="btn btn-sm btn-light ml-2"
+                                                   href="/hobby/{{ $hobby->id }}/edit"><i class="fas fa-edit"></i> Edit Hobby</a>
+                                            @endcan
+                                        @endauth
+                                        <span class="btn-sm mx-2">Posted by: <a class="btn btn-sm btn-light" href="/user/{{ $hobby->user->id }}"><u>{{ $hobby->user->name }} ({{ $hobby->user->hobbies->count() }} Hobbies)</u></a>
+                                    @if(file_exists('img/hobbies/' . $hobby->id . '_thumb.jpg'))
+                                        <a href="/user/{{ $hobby->user->id }}"><img class="rounded"
+                                                                                src="/img/users/{{ $hobby->user->id }}_thumb.jpg" alt="User Thumb">
+                                        </a>
+                                    @endif
+                                    </span>
+                                        @auth
+                                            @can('delete', $hobby)
+                                                <form class="float-right" style="display: inline"
+                                                      action="/hobby/{{ $hobby->id }}" method="post">
+                                                    @csrf
+                                                    @method("DELETE")
+                                                    <input class="btn btn-sm btn-outline-danger" type="submit"
+                                                           value="Delete">
+                                                </form>
+                                            @endcan
+                                        @endauth
+                                    <span class="float-right mx-2">{{ $hobby->created_at->diffForHumans() }}</span>
+                                    <br>
+                                    @foreach($hobby->tags as $tag)
+                                        <a href="/hobby/tag/{{ $tag->id }}"><span
+                                                class="badge badge-{{ $tag->style }}">{{ $tag->name }}</span></a>
+                                    @endforeach
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    {{ $hobbies->links() }}
+                </div>
+                @auth
+                    <div class="mt-2">
+                        <a class="btn btn-success btn-sm" href="/hobby/create"><i class="fas fa-plus-circle"></i> Create
+                            new Hobby</a>
+                    </div>
+                @endauth
+            </div>
+        </div>
+    </div>
+@endsection
